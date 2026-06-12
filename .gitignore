@@ -37,3 +37,4 @@ Release
 .pixi
 *.egg-info
 .build
+install/

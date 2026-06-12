@@ -41,8 +41,6 @@ endif()
 set(serial_cpp_SRCS
     src/serial.cc
     include/serial_cpp/serial.h
-    include/serial_cpp/v8stdint.h
-    include/serial_cpp/serial_compat.h
 )
 if(APPLE)
     # If OSX
@@ -96,7 +94,7 @@ if(serial_cpp_INSTALL)
     )
     
     ## Install headers
-    install(FILES include/serial_cpp/serial.h include/serial_cpp/v8stdint.h include/serial_cpp/serial_compat.h
+    install(FILES include/serial_cpp/serial.h
         DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}")
     
     ## Generate and install CMake config files
