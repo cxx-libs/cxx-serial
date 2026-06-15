@@ -193,11 +193,6 @@ private:
   bytesize_t bytesize_;       // Size of the bytes
   stopbits_t stopbits_;       // Stop Bits
   flowcontrol_t flowcontrol_; // Flow Control
-
-  // Mutex used to lock the read functions
-  HANDLE read_mutex;
-  // Mutex used to lock the write functions
-  HANDLE write_mutex;
 };
 
 }

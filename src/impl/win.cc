@@ -41,15 +41,11 @@ Serial::SerialImpl::SerialImpl (const string &port, unsigned long baudrate,
 {
   if (port_.empty () == false)
     open ();
-  read_mutex = CreateMutex(NULL, false, NULL);
-  write_mutex = CreateMutex(NULL, false, NULL);
 }
 
 Serial::SerialImpl::~SerialImpl ()
 {
   this->close();
-  CloseHandle(read_mutex);
-  CloseHandle(write_mutex);
 }
 
 void
@@ -608,38 +604,6 @@ Serial::SerialImpl::getCD()
   }
 
   return (MS_RLSD_ON & dwModemStatus) != 0;
-}
-
-void
-Serial::SerialImpl::readLock()
-{
-  if (WaitForSingleObject(read_mutex, INFINITE) != WAIT_OBJECT_0) {
-    THROW (IOException, "Error claiming read mutex.");
-  }
-}
-
-void
-Serial::SerialImpl::readUnlock()
-{
-  if (!ReleaseMutex(read_mutex)) {
-    THROW (IOException, "Error releasing read mutex.");
-  }
-}
-
-void
-Serial::SerialImpl::writeLock()
-{
-  if (WaitForSingleObject(write_mutex, INFINITE) != WAIT_OBJECT_0) {
-    THROW (IOException, "Error claiming write mutex.");
-  }
-}
-
-void
-Serial::SerialImpl::writeUnlock()
-{
-  if (!ReleaseMutex(write_mutex)) {
-    THROW (IOException, "Error releasing write mutex.");
-  }
 }
 
 #endif // #if defined(_WIN32)

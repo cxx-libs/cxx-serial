@@ -113,8 +113,6 @@ Serial::SerialImpl::SerialImpl (const string &port, unsigned long baudrate,
     baudrate_ (baudrate), parity_ (parity),
     bytesize_ (bytesize), stopbits_ (stopbits), flowcontrol_ (flowcontrol)
 {
-  pthread_mutex_init(&this->read_mutex, NULL);
-  pthread_mutex_init(&this->write_mutex, NULL);
   if (port_.empty () == false)
     open ();
 }
@@ -122,8 +120,6 @@ Serial::SerialImpl::SerialImpl (const string &port, unsigned long baudrate,
 Serial::SerialImpl::~SerialImpl ()
 {
   close();
-  pthread_mutex_destroy(&this->read_mutex);
-  pthread_mutex_destroy(&this->write_mutex);
 }
 
 void
@@ -1042,42 +1038,6 @@ Serial::SerialImpl::getCD ()
   else
   {
     return 0 != (status & TIOCM_CD);
-  }
-}
-
-void
-Serial::SerialImpl::readLock ()
-{
-  int result = pthread_mutex_lock(&this->read_mutex);
-  if (result) {
-    THROW (IOException, result);
-  }
-}
-
-void
-Serial::SerialImpl::readUnlock ()
-{
-  int result = pthread_mutex_unlock(&this->read_mutex);
-  if (result) {
-    THROW (IOException, result);
-  }
-}
-
-void
-Serial::SerialImpl::writeLock ()
-{
-  int result = pthread_mutex_lock(&this->write_mutex);
-  if (result) {
-    THROW (IOException, result);
-  }
-}
-
-void
-Serial::SerialImpl::writeUnlock ()
-{
-  int result = pthread_mutex_unlock(&this->write_mutex);
-  if (result) {
-    THROW (IOException, result);
   }
 }
 

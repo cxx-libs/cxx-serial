@@ -69,7 +69,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC "$<BUILD_INTERFACE:${CMAKE_CUR
 if(APPLE)
     target_link_libraries(${PROJECT_NAME} PRIVATE ${FOUNDATION_LIBRARY} ${IOKIT_LIBRARY})
 elseif(UNIX)
-    target_link_libraries(${PROJECT_NAME} PRIVATE rt pthread)
+    target_link_libraries(${PROJECT_NAME} PRIVATE rt)
 else()
     target_link_libraries(${PROJECT_NAME} PRIVATE setupapi)
 endif()

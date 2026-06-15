@@ -32,37 +32,6 @@ using serial_cpp::parity_t;
 using serial_cpp::stopbits_t;
 using serial_cpp::flowcontrol_t;
 
-class Serial::ScopedReadLock {
-public:
-  ScopedReadLock(SerialImpl *pimpl) : pimpl_(pimpl) {
-    this->pimpl_->readLock();
-  }
-  ~ScopedReadLock() {
-    this->pimpl_->readUnlock();
-  }
-private:
-  // Disable copy constructors
-  ScopedReadLock(const ScopedReadLock&);
-  const ScopedReadLock& operator=(ScopedReadLock);
-
-  SerialImpl *pimpl_;
-};
-
-class Serial::ScopedWriteLock {
-public:
-  ScopedWriteLock(SerialImpl *pimpl) : pimpl_(pimpl) {
-    this->pimpl_->writeLock();
-  }
-  ~ScopedWriteLock() {
-    this->pimpl_->writeUnlock();
-  }
-private:
-  // Disable copy constructors
-  ScopedWriteLock(const ScopedWriteLock&);
-  const ScopedWriteLock& operator=(ScopedWriteLock);
-  SerialImpl *pimpl_;
-};
-
 Serial::Serial (const string &port, uint32_t baudrate, const serial_cpp::Timeout& timeout,
                 bytesize_t bytesize, parity_t parity, stopbits_t stopbits,
                 flowcontrol_t flowcontrol)
@@ -72,10 +41,7 @@ Serial::Serial (const string &port, uint32_t baudrate, const serial_cpp::Timeout
   pimpl_->setTimeout(timeout);
 }
 
-Serial::~Serial ()
-{
-  delete pimpl_;
-}
+Serial::~Serial() noexcept {}
 
 void
 Serial::open ()
@@ -123,14 +89,14 @@ Serial::read_ (uint8_t *buffer, size_t size)
 size_t
 Serial::read (uint8_t *buffer, size_t size)
 {
-  ScopedReadLock lock(this->pimpl_);
+  std::lock_guard<std::mutex> lock(m_read);
   return this->pimpl_->read (buffer, size);
 }
 
 size_t
 Serial::read (std::vector<uint8_t> &buffer, size_t size)
 {
-  ScopedReadLock lock(this->pimpl_);
+  std::lock_guard<std::mutex> lock(m_read);
   uint8_t *buffer_ = new uint8_t[size];
   size_t bytes_read = 0;
 
@@ -150,7 +116,7 @@ Serial::read (std::vector<uint8_t> &buffer, size_t size)
 size_t
 Serial::read (std::string &buffer, size_t size)
 {
-  ScopedReadLock lock(this->pimpl_);
+  std::lock_guard<std::mutex> lock(m_read);
   uint8_t *buffer_ = new uint8_t[size];
   size_t bytes_read = 0;
   try {
@@ -176,7 +142,7 @@ Serial::read (size_t size)
 size_t
 Serial::readline (string &buffer, size_t size, string eol)
 {
-  ScopedReadLock lock(this->pimpl_);
+  std::lock_guard<std::mutex> lock(m_read);
   size_t eol_len = eol.length ();
   uint8_t *buffer_ = static_cast<uint8_t*>
                               (alloca (size * sizeof (uint8_t)));
@@ -212,7 +178,7 @@ Serial::readline (size_t size, string eol)
 vector<string>
 Serial::readlines (size_t size, string eol)
 {
-  ScopedReadLock lock(this->pimpl_);
+  std::lock_guard<std::mutex> lock(m_read);
   std::vector<std::string> lines;
   size_t eol_len = eol.length ();
   uint8_t *buffer_ = static_cast<uint8_t*>
@@ -254,7 +220,7 @@ Serial::readlines (size_t size, string eol)
 size_t
 Serial::write (const string &data)
 {
-  ScopedWriteLock lock(this->pimpl_);
+  std::lock_guard<std::mutex> lock(m_write);
   return this->write_ (reinterpret_cast<const uint8_t*>(data.c_str()),
                        data.length());
 }
@@ -262,14 +228,14 @@ Serial::write (const string &data)
 size_t
 Serial::write (const std::vector<uint8_t> &data)
 {
-  ScopedWriteLock lock(this->pimpl_);
+  std::lock_guard<std::mutex> lock(m_write);
   return this->write_ (&data[0], data.size());
 }
 
 size_t
 Serial::write (const uint8_t *data, size_t size)
 {
-  ScopedWriteLock lock(this->pimpl_);
+  std::lock_guard<std::mutex> lock(m_write);
   return this->write_(data, size);
 }
 
@@ -282,8 +248,8 @@ Serial::write_ (const uint8_t *data, size_t length)
 void
 Serial::setPort (const string &port)
 {
-  ScopedReadLock rlock(this->pimpl_);
-  ScopedWriteLock wlock(this->pimpl_);
+  std::lock_guard<std::mutex> lock(m_read);
+  std::lock_guard<std::mutex> lock_write(m_write);
   bool was_open = pimpl_->isOpen ();
   if (was_open) close();
   pimpl_->setPort (port);
@@ -369,20 +335,20 @@ Serial::getFlowcontrol () const
 
 void Serial::flush ()
 {
-  ScopedReadLock rlock(this->pimpl_);
-  ScopedWriteLock wlock(this->pimpl_);
+std::lock_guard<std::mutex> lock(m_read);
+std::lock_guard<std::mutex> lock_write(m_write);
   pimpl_->flush ();
 }
 
 void Serial::flushInput ()
 {
-  ScopedReadLock lock(this->pimpl_);
+std::lock_guard<std::mutex> lock(m_read);
   pimpl_->flushInput ();
 }
 
 void Serial::flushOutput ()
 {
-  ScopedWriteLock lock(this->pimpl_);
+  std::lock_guard<std::mutex> lock(m_write);
   pimpl_->flushOutput ();
 }
 

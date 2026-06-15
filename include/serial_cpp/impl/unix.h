@@ -42,12 +42,8 @@
 
 #include "serial_cpp/serial.h"
 
-#include <pthread.h>
-
 namespace serial_cpp {
 
-using std::size_t;
-using std::string;
 using std::invalid_argument;
 
 using serial_cpp::SerialException;
@@ -65,7 +61,7 @@ private:
 
 class serial_cpp::Serial::SerialImpl {
 public:
-  SerialImpl (const string &port,
+  SerialImpl (const std::string &port,
               unsigned long baudrate,
               bytesize_t bytesize,
               parity_t parity,
@@ -83,20 +79,20 @@ public:
   bool
   isOpen () const;
 
-  size_t
+  std::size_t
   available ();
 
   bool
   waitReadable (uint32_t timeout);
 
   void
-  waitByteTimes (size_t count);
+  waitByteTimes (std::size_t count);
 
-  size_t
-  read (uint8_t *buf, size_t size = 1);
+  std::size_t
+  read (uint8_t *buf, std::size_t size = 1);
 
-  size_t
-  write (const uint8_t *data, size_t length);
+  std::size_t
+  write (const uint8_t *data, std::size_t length);
 
   void
   flush ();
@@ -135,9 +131,9 @@ public:
   getCD ();
 
   void
-  setPort (const string &port);
+  setPort (const std::string &port);
 
-  string
+  std::string
   getPort () const;
 
   void
@@ -192,7 +188,7 @@ protected:
   void reconfigurePort ();
 
 private:
-  string port_;               // Path to the file descriptor
+  std::string port_;               // Path to the file descriptor
   int fd_;                    // The current file descriptor
 
   bool is_open_;
@@ -207,11 +203,6 @@ private:
   bytesize_t bytesize_;       // Size of the bytes
   stopbits_t stopbits_;       // Stop Bits
   flowcontrol_t flowcontrol_; // Flow Control
-
-  // Mutex used to lock the read functions
-  pthread_mutex_t read_mutex;
-  // Mutex used to lock the write functions
-  pthread_mutex_t write_mutex;
 };
 
 }

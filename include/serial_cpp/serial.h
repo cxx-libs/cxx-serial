@@ -44,6 +44,8 @@
 #include <exception>
 #include <stdexcept>
 #include <cstdint>
+#include <mutex>
+#include <memory>
 
 #define THROW(exceptionClass, message) throw exceptionClass(__FILE__, \
 __LINE__, (message) )
@@ -95,11 +97,9 @@ typedef enum {
  *
  * In order to disable the interbyte timeout, set it to Timeout::max().
  */
-struct Timeout {
-#ifdef max
-# undef max
-#endif
-  static uint32_t max() {return std::numeric_limits<uint32_t>::max();}
+struct Timeout
+{
+  static std::uint32_t max() noexcept {return (std::numeric_limits<std::uint32_t>::max)();}
   /*!
    * Convenience function to generate Timeout structs using a
    * single absolute timeout.
@@ -144,7 +144,8 @@ struct Timeout {
 /*!
  * Class that provides a portable serial port interface.
  */
-class Serial {
+class Serial
+{
 public:
   /*!
    * Creates a Serial object and opens the port if a port is specified,
@@ -186,7 +187,7 @@ public:
           flowcontrol_t flowcontrol = flowcontrol_none);
 
   /*! Destructor */
-  virtual ~Serial ();
+  virtual ~Serial() noexcept;
 
   /*!
    * Opens the serial port as long as the port is set and the port isn't
@@ -654,11 +655,11 @@ private:
 
   // Pimpl idiom, d_pointer
   class SerialImpl;
-  SerialImpl *pimpl_;
+  std::unique_ptr<SerialImpl> pimpl_{nullptr};
 
   // Scoped Lock Classes
-  class ScopedReadLock;
-  class ScopedWriteLock;
+  std::mutex m_read;
+  std::mutex m_write;
 
   // Read common function
   size_t
