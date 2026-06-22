@@ -14,11 +14,15 @@ using serial_cpp::SerialException;
 using serial_cpp::stopbits_t;
 using serial_cpp::Timeout;
 
-inline std::wstring _prefix_port_if_needed( const std::wstring& input )
+inline std::wstring _prefix_port_if_needed( const std::string_view input )
 {
-  static std::wstring windows_com_port_prefix = L"\\\\.\\";
-  if( input.compare( 0, windows_com_port_prefix.size(), windows_com_port_prefix ) != 0 ) { return windows_com_port_prefix + input; }
-  return input;
+  static const std::wstring windows_com_port_prefix = L"\\\\.\\";
+  // convert UTF-8 (or narrow) string_view -> wstring
+  const std::size_t         size_needed{ MultiByteToWideChar( CP_UTF8, 0, input.data(), static_cast<int>( input.size() ), nullptr, 0 ) };
+  std::wstring              winput( size_needed, L'\0' );
+  MultiByteToWideChar( CP_UTF8, 0, input.data(), static_cast<int>( input.size() ), winput.data(), size_needed );
+  if( winput.compare( 0, windows_com_port_prefix.size(), windows_com_port_prefix ) != 0 ) return windows_com_port_prefix + winput;
+  return winput;
 }
 
 Serial::SerialImpl::SerialImpl( const std::string_view port, unsigned long baudrate, bytesize_t bytesize, parity_t parity, stopbits_t stopbits, flowcontrol_t flowcontrol ) :
@@ -36,8 +40,7 @@ void Serial::SerialImpl::open()
 
   // See: https://github.com/wjwwood/serial/issues/84
   std::wstring port_with_prefix = _prefix_port_if_needed( port_ );
-  LPCWSTR      lp_port          = port_with_prefix.c_str();
-  fd_                           = CreateFileW( lp_port, GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0 );
+  fd_                           = CreateFileW( port_with_prefix.c_str(), GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0 );
 
   if( fd_ == INVALID_HANDLE_VALUE )
   {
