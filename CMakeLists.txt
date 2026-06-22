@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5...3.10)
+cmake_minimum_required(VERSION 3.15...${CMAKE_VERSION})
 
 # Get name from package.xml to avoid duplicating the version number
 file(READ package.xml SERIAL_CPP_PACKAGE_XML)
@@ -21,39 +21,32 @@ mark_as_advanced(serial_cpp_FORCE_RESPECT_BUILD_TESTING)
 
 # Detect if project is top level or not (fall back for CMake < 3.21)
 if(CMAKE_VERSION VERSION_LESS "3.21.0")
-    if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
-        set(PROJECT_IS_TOP_LEVEL ON)
-    else()
-        set(PROJECT_IS_TOP_LEVEL OFF)
-    endif()
+  if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
+    set(PROJECT_IS_TOP_LEVEL ON)
+  else()
+    set(PROJECT_IS_TOP_LEVEL OFF)
+  endif()
 endif()
-
 
 # Default install locations
 include(GNUInstallDirs)
 
 if(APPLE)
-    find_library(IOKIT_LIBRARY IOKit)
-    find_library(FOUNDATION_LIBRARY Foundation)
+  find_library(IOKIT_LIBRARY IOKit)
+  find_library(FOUNDATION_LIBRARY Foundation)
 endif()
 
 ## Sources
-set(serial_cpp_SRCS
-    src/serial.cc
-    include/serial_cpp/serial.h
-)
+set(serial_cpp_SRCS src/serial.cc include/serial_cpp/serial.h)
 if(APPLE)
-    # If OSX
-    list(APPEND serial_cpp_SRCS src/impl/unix.cc)
-    list(APPEND serial_cpp_SRCS src/impl/list_ports/list_ports_osx.cc)
+  list(APPEND serial_cpp_SRCS src/impl/unix.cc)
+  list(APPEND serial_cpp_SRCS src/impl/list_ports/list_ports_osx.cc)
 elseif(UNIX)
-    # If unix
-    list(APPEND serial_cpp_SRCS src/impl/unix.cc)
-    list(APPEND serial_cpp_SRCS src/impl/list_ports/list_ports_linux.cc)
+  list(APPEND serial_cpp_SRCS src/impl/unix.cc)
+  list(APPEND serial_cpp_SRCS src/impl/list_ports/list_ports_linux.cc)
 else()
-    # If windows
-    list(APPEND serial_cpp_SRCS src/impl/win.cc)
-    list(APPEND serial_cpp_SRCS src/impl/list_ports/list_ports_win.cc)
+  list(APPEND serial_cpp_SRCS src/impl/win.cc)
+  list(APPEND serial_cpp_SRCS src/impl/list_ports/list_ports_win.cc)
 endif()
 
 ## Add serial library
@@ -65,18 +58,18 @@ add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 target_include_directories(${PROJECT_NAME} PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
                                                   "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>")
 
-# Link neeed libraries
+# Link needed libraries
 if(APPLE)
-    target_link_libraries(${PROJECT_NAME} PRIVATE ${FOUNDATION_LIBRARY} ${IOKIT_LIBRARY})
+  target_link_libraries(${PROJECT_NAME} PRIVATE ${FOUNDATION_LIBRARY} ${IOKIT_LIBRARY})
 elseif(UNIX)
-    target_link_libraries(${PROJECT_NAME} PRIVATE rt)
+  target_link_libraries(${PROJECT_NAME} PRIVATE rt)
 else()
-    target_link_libraries(${PROJECT_NAME} PRIVATE setupapi)
+  target_link_libraries(${PROJECT_NAME} PRIVATE setupapi)
 endif()
 
 ## Shared library support on Windows
 if(WIN32 AND BUILD_SHARED_LIBS)
-    set_target_properties(${PROJECT_NAME} PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
+  set_target_properties(${PROJECT_NAME} PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
 endif()
 
 ## Uncomment for example
@@ -90,47 +83,31 @@ target_link_libraries(modbus_cpp_example ${PROJECT_NAME}::${PROJECT_NAME})
 
 ## Install library
 if(serial_cpp_INSTALL)
-    install(TARGETS ${PROJECT_NAME}
-        EXPORT ${PROJECT_NAME}Targets
-        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-    )
-    
-    ## Install headers
-    install(FILES include/serial_cpp/serial.h
-        DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}")
-    
-    ## Generate and install CMake config files
-    include(CMakePackageConfigHelpers)
-    
-    set(SERIAL_CPP_CMAKE_FILES_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}")
-    
-    install(EXPORT ${PROJECT_NAME}Targets
-            FILE ${PROJECT_NAME}Targets.cmake
-            NAMESPACE ${PROJECT_NAME}::
-            DESTINATION "${SERIAL_CPP_CMAKE_FILES_INSTALL_DIR}"
-    )
-    
-    configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/Config.cmake.in
-      "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
-      INSTALL_DESTINATION "${SERIAL_CPP_CMAKE_FILES_INSTALL_DIR}"
-    )
-    
-    write_basic_package_version_file(
-        "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
-        VERSION "${serial_cpp_VERSION}"
-        COMPATIBILITY AnyNewerVersion
-    )
-    
-    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
-                  "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
-        DESTINATION "${SERIAL_CPP_CMAKE_FILES_INSTALL_DIR}")
-    
-    
-    ## Install package.xml
-    install(FILES package.xml
-        DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/${PROJECT_NAME}")
+  install(TARGETS ${PROJECT_NAME}
+          EXPORT ${PROJECT_NAME}Targets
+          ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+          LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+          RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+
+  ## Install headers
+  install(FILES include/serial_cpp/serial.h DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}")
+
+  ## Generate and install CMake config files
+  include(CMakePackageConfigHelpers)
+  set(SERIAL_CPP_CMAKE_FILES_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}")
+
+  install(EXPORT ${PROJECT_NAME}Targets
+          FILE ${PROJECT_NAME}Targets.cmake
+          NAMESPACE ${PROJECT_NAME}::
+          DESTINATION "${SERIAL_CPP_CMAKE_FILES_INSTALL_DIR}")
+
+  configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/Config.cmake.in "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake" INSTALL_DESTINATION "${SERIAL_CPP_CMAKE_FILES_INSTALL_DIR}")
+  write_basic_package_version_file("${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake" VERSION "${serial_cpp_VERSION}" COMPATIBILITY AnyNewerVersion)
+
+  install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake" "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake" DESTINATION "${SERIAL_CPP_CMAKE_FILES_INSTALL_DIR}")
+
+  ## Install package.xml
+  install(FILES package.xml DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/${PROJECT_NAME}")
 endif()
 
 ## Tests
@@ -140,5 +117,5 @@ include(CTest)
 # via FetchContent or add_subdirectory and if you want to compile tests, you
 # need to set both BUILD_TESTING and serial_cpp_FORCE_RESPECT_BUILD_TESTING to ON
 if(BUILD_TESTING AND (PROJECT_IS_TOP_LEVEL OR serial_cpp_FORCE_RESPECT_BUILD_TESTING))
-    add_subdirectory(tests)
+  add_subdirectory(tests)
 endif()

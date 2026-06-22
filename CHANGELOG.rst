@@ -3,8 +3,8 @@ Changelog for package serial
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file documents notable changes to this project done before April 2015.
- 
-For changes after that date, plase refers to the release notes of each release at https://github.com/ami-iit/serial_cpp/releases .
+
+For changes after that date, please refers to the release notes of each release at https://github.com/ami-iit/serial_cpp/releases .
 
 1.2.1 (2015-04-21)
 ------------------
@@ -31,7 +31,7 @@ For changes after that date, plase refers to the release notes of each release a
 * Added ability to enumerate ports on linux and windows.
   Updated serial_example.cc to show example of port enumeration.
 * Fixed compile on VS2013
-* Added functions ``waitReadable`` and ``waitByteTimes`` with implemenations for Unix to support high performance reading
+* Added functions ``waitReadable`` and ``waitByteTimes`` with implementations for Unix to support high performance reading
 * Contributors: Christopher Baker, Craig Lilley, Konstantina Kastanara, Mike Purvis, William Woodall
 
 1.1.7 (2014-02-20)
@@ -57,7 +57,7 @@ For changes after that date, plase refers to the release notes of each release a
 * Update how custom baudrates are handled on OS X
   This is taken from the example serial program on Apple's developer website, see:
   http://free-pascal-general.1045716.n5.nabble.com/Non-standard-baud-rates-in-OS-X-IOSSIOSPEED-IOCTL-td4699923.html
-* Timout settings are now applied by reconfigurePort
+* Timeout settings are now applied by reconfigurePort
 * Pass LPCWSTR to CreateFile in Windows impl
 * Use wstring for ``port_`` type in Windows impl
 
