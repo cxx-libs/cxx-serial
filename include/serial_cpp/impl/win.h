@@ -127,14 +127,6 @@ public:
 
   flowcontrol_t getFlowcontrol() const;
 
-  void readLock();
-
-  void readUnlock();
-
-  void writeLock();
-
-  void writeUnlock();
-
 protected:
   void reconfigurePort();
 
