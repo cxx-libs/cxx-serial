@@ -313,7 +313,7 @@ size_t Serial::SerialImpl::write( const uint8_t* data, size_t length )
   return (size_t)( bytes_written );
 }
 
-void Serial::SerialImpl::setPort( const std::string& port ) { port_ = std::wstring( port.begin(), port.end() ); }
+void Serial::SerialImpl::setPort( const std::string& port ) { port_ = port; }
 
 std::string Serial::SerialImpl::getPort() const { return std::string( port_.begin(), port_.end() ); }
 
