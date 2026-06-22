@@ -5,14 +5,15 @@
  * http://opensource.org/licenses/MIT
  */
 #include "serial_cpp/serial.h"
-
+// clang-format off
 #include <cstring>
+#include <windows.h>
 #include <devguid.h>
 #include <initguid.h>
 #include <setupapi.h>
 #include <tchar.h>
-#include <windows.h>
 #include <winioctl.h>
+// clang-format on
 
 using serial_cpp::PortInfo;
 
