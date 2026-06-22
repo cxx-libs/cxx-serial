@@ -34,20 +34,13 @@
  *
  */
 
-#if defined( _WIN32 )
+#ifndef SERIAL_IMPL_WINDOWS_H
+#define SERIAL_IMPL_WINDOWS_H
 
-  #ifndef SERIAL_IMPL_WINDOWS_H
-    #define SERIAL_IMPL_WINDOWS_H
-
-    #include "serial_cpp/serial.h"
-    #include "windows.h"
+#include "serial_cpp/serial.h"
 
 namespace serial_cpp
 {
-
-using std::invalid_argument;
-using std::string;
-using std::wstring;
 
 using serial_cpp::IOException;
 using serial_cpp::SerialException;
@@ -55,7 +48,7 @@ using serial_cpp::SerialException;
 class serial_cpp::Serial::SerialImpl
 {
 public:
-  SerialImpl( const string& port, unsigned long baudrate, bytesize_t bytesize, parity_t parity, stopbits_t stopbits, flowcontrol_t flowcontrol );
+  SerialImpl( const std::string& port, unsigned long baudrate, bytesize_t bytesize, parity_t parity, stopbits_t stopbits, flowcontrol_t flowcontrol );
 
   virtual ~SerialImpl();
 
@@ -65,15 +58,15 @@ public:
 
   bool isOpen() const;
 
-  size_t available();
+  std::size_t available();
 
-  bool waitReadable( uint32_t timeout );
+  bool waitReadable( std::uint32_t timeout );
 
-  void waitByteTimes( size_t count );
+  void waitByteTimes( std::size_t count );
 
-  size_t read( uint8_t* buf, size_t size = 1 );
+  std::size_t read( std::uint8_t* buf, std::size_t size = 1 );
 
-  size_t write( const uint8_t* data, size_t length );
+  std::size_t write( const std::uint8_t* data, std::size_t length );
 
   void flush();
 
@@ -99,9 +92,9 @@ public:
 
   bool getCD();
 
-  void setPort( const string& port );
+  void setPort( const std::string& port );
 
-  string getPort() const;
+  std::string getPort() const;
 
   void setTimeout( const Timeout& timeout );
 
@@ -131,8 +124,8 @@ protected:
   void reconfigurePort();
 
 private:
-  wstring port_;  // Path to the file descriptor
-  HANDLE  fd_;
+  std::wstring port_;  // Path to the file descriptor
+  void*        fd_{ nullptr };
 
   bool is_open_;
 
@@ -147,6 +140,4 @@ private:
 
 }  // namespace serial_cpp
 
-  #endif  // SERIAL_IMPL_WINDOWS_H
-
-#endif  // if defined(_WIN32)
+#endif  // SERIAL_IMPL_WINDOWS_H

@@ -34,13 +34,10 @@
  * based off termios.h and uses select for multiplexing the IO ports.
  *
  */
+#ifndef SERIAL_IMPL_UNIX_H
+#define SERIAL_IMPL_UNIX_H
 
-#if !defined( _WIN32 )
-
-  #ifndef SERIAL_IMPL_UNIX_H
-    #define SERIAL_IMPL_UNIX_H
-
-    #include "serial_cpp/serial.h"
+#include "serial_cpp/serial.h"
 
 namespace serial_cpp
 {
@@ -53,8 +50,8 @@ using serial_cpp::SerialException;
 class MillisecondTimer
 {
 public:
-  MillisecondTimer( const uint32_t millis );
-  int64_t remaining();
+  MillisecondTimer( const std::uint32_t millis );
+  std::int64_t remaining();
 
 private:
   static timespec timespec_now();
@@ -76,13 +73,13 @@ public:
 
   std::size_t available();
 
-  bool waitReadable( uint32_t timeout );
+  bool waitReadable( std::uint32_t timeout );
 
   void waitByteTimes( std::size_t count );
 
-  std::size_t read( uint8_t* buf, std::size_t size = 1 );
+  std::size_t read( std::uint8_t* buf, std::size_t size = 1 );
 
-  std::size_t write( const uint8_t* data, std::size_t length );
+  std::size_t write( const std::uint8_t* data, std::size_t length );
 
   void flush();
 
@@ -159,6 +156,4 @@ private:
 
 }  // namespace serial_cpp
 
-  #endif  // SERIAL_IMPL_UNIX_H
-
-#endif  // !defined(_WIN32)
+#endif  // SERIAL_IMPL_UNIX_H
