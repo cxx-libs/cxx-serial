@@ -84,6 +84,10 @@ add_executable(serial_cpp_example examples/serial_cpp_example.cc)
 add_dependencies(serial_cpp_example ${PROJECT_NAME}::${PROJECT_NAME})
 target_link_libraries(serial_cpp_example ${PROJECT_NAME}::${PROJECT_NAME})
 
+add_executable(modbus_cpp_example examples/modbus.cpp)
+add_dependencies(modbus_cpp_example ${PROJECT_NAME}::${PROJECT_NAME})
+target_link_libraries(modbus_cpp_example ${PROJECT_NAME}::${PROJECT_NAME})
+
 ## Install library
 if(serial_cpp_INSTALL)
     install(TARGETS ${PROJECT_NAME}

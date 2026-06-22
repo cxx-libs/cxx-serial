@@ -151,7 +151,7 @@ std::string parse_string(const std::vector<uint8_t>& resp)
 int main()
 {
     serial_cpp::Serial serial(
-        "/dev/ttyUSB0",
+        "COM5",
         9600,
         serial_cpp::Timeout::simpleTimeout(1000),
         serial_cpp::eightbits,
