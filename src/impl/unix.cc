@@ -51,17 +51,14 @@ using serial_cpp::MillisecondTimer;
 using serial_cpp::PortNotOpenedException;
 using serial_cpp::Serial;
 using serial_cpp::SerialException;
-using std::invalid_argument;
-using std::string;
-using std::stringstream;
 
-MillisecondTimer::MillisecondTimer( const uint32_t millis ) : expiry( timespec_now() )
+MillisecondTimer::MillisecondTimer( const std::uint32_t millis ) : expiry( timespec_now() )
 {
-  int64_t tv_nsec = expiry.tv_nsec + ( millis * 1e6 );
+  std::int64_t tv_nsec = expiry.tv_nsec + ( millis * 1e6 );
   if( tv_nsec >= 1e9 )
   {
-    int64_t sec_diff = tv_nsec / static_cast<int>( 1e9 );
-    expiry.tv_nsec   = tv_nsec % static_cast<int>( 1e9 );
+    std::int64_t sec_diff = tv_nsec / static_cast<int>( 1e9 );
+    expiry.tv_nsec        = tv_nsec % static_cast<int>( 1e9 );
     expiry.tv_sec += sec_diff;
   }
   else
@@ -70,10 +67,10 @@ MillisecondTimer::MillisecondTimer( const uint32_t millis ) : expiry( timespec_n
   }
 }
 
-int64_t MillisecondTimer::remaining()
+std::int64_t MillisecondTimer::remaining()
 {
-  timespec now( timespec_now() );
-  int64_t  millis = ( expiry.tv_sec - now.tv_sec ) * 1e3;
+  timespec     now( timespec_now() );
+  std::int64_t millis = ( expiry.tv_sec - now.tv_sec ) * 1e3;
   millis += ( expiry.tv_nsec - now.tv_nsec ) / 1e6;
   return millis;
 }
@@ -95,7 +92,7 @@ timespec MillisecondTimer::timespec_now()
   return time;
 }
 
-timespec timespec_from_ms( const uint32_t millis )
+timespec timespec_from_ms( const std::uint32_t millis )
 {
   timespec time;
   time.tv_sec  = millis / 1e3;
@@ -444,7 +441,7 @@ void Serial::SerialImpl::close()
 
 bool Serial::SerialImpl::isOpen() const { return is_open_; }
 
-size_t Serial::SerialImpl::available()
+std::size_t Serial::SerialImpl::available()
 {
   if( !is_open_ ) { return 0; }
   int count = 0;
@@ -455,7 +452,7 @@ size_t Serial::SerialImpl::available()
   }
 }
 
-bool Serial::SerialImpl::waitReadable( uint32_t timeout )
+bool Serial::SerialImpl::waitReadable( std::uint32_t timeout )
 {
   // Setup a select call to block for serial data or a timeout
   fd_set readfds;
@@ -483,17 +480,17 @@ bool Serial::SerialImpl::waitReadable( uint32_t timeout )
   return true;
 }
 
-void Serial::SerialImpl::waitByteTimes( size_t count )
+void Serial::SerialImpl::waitByteTimes( std::size_t count )
 {
   timespec wait_time = { 0, static_cast<long>( byte_time_ns_ * count ) };
   pselect( 0, NULL, NULL, NULL, &wait_time, NULL );
 }
 
-size_t Serial::SerialImpl::read( uint8_t* buf, size_t size )
+std::size_t Serial::SerialImpl::read( std::uint8_t* buf, std::size_t size )
 {
   // If the port is not open, throw
   if( !is_open_ ) { throw PortNotOpenedException( "Serial::read" ); }
-  size_t bytes_read = 0;
+  std::size_t bytes_read = 0;
 
   // Calculate total timeout in milliseconds t_c + (t_m * N)
   long total_timeout_ms = timeout_.read_timeout_constant;
@@ -508,7 +505,7 @@ size_t Serial::SerialImpl::read( uint8_t* buf, size_t size )
 
   while( bytes_read < size )
   {
-    int64_t timeout_remaining_ms = total_timeout.remaining();
+    std::int64_t timeout_remaining_ms = total_timeout.remaining();
     if( timeout_remaining_ms <= 0 )
     {
       // Timed out
@@ -516,7 +513,7 @@ size_t Serial::SerialImpl::read( uint8_t* buf, size_t size )
     }
     // Timeout for the next select is whichever is less of the remaining
     // total read timeout and the inter-byte timeout.
-    uint32_t timeout = std::min( static_cast<uint32_t>( timeout_remaining_ms ), timeout_.inter_byte_timeout );
+    std::uint32_t timeout = std::min( static_cast<std::uint32_t>( timeout_remaining_ms ), timeout_.inter_byte_timeout );
     // Wait for the device to be readable, and then attempt to read.
     if( waitReadable( timeout ) )
     {
@@ -559,11 +556,11 @@ size_t Serial::SerialImpl::read( uint8_t* buf, size_t size )
   return bytes_read;
 }
 
-size_t Serial::SerialImpl::write( const uint8_t* data, size_t length )
+std::size_t Serial::SerialImpl::write( const std::uint8_t* data, std::size_t length )
 {
   if( is_open_ == false ) { throw PortNotOpenedException( "Serial::write" ); }
-  fd_set writefds;
-  size_t bytes_written = 0;
+  fd_set      writefds;
+  std::size_t bytes_written = 0;
 
   // Calculate total timeout in milliseconds t_c + (t_m * N)
   long total_timeout_ms = timeout_.write_timeout_constant;
@@ -653,9 +650,9 @@ size_t Serial::SerialImpl::write( const uint8_t* data, size_t length )
   return bytes_written;
 }
 
-void Serial::SerialImpl::setPort( const string& port ) { port_ = port; }
+void Serial::SerialImpl::setPort( const std::string& port ) { port_ = port; }
 
-string Serial::SerialImpl::getPort() const { return port_; }
+std::string Serial::SerialImpl::getPort() const { return port_; }
 
 void Serial::SerialImpl::setTimeout( const serial_cpp::Timeout& timeout ) { timeout_ = timeout; }
 
@@ -733,7 +730,7 @@ void Serial::SerialImpl::setBreak( bool level )
   {
     if( -1 == ioctl( fd_, TIOCSBRK ) )
     {
-      stringstream ss;
+      std::stringstream ss;
       ss << "setBreak failed on a call to ioctl(TIOCSBRK): " << errno << " " << strerror( errno );
       throw( SerialException( ss.str().c_str() ) );
     }
@@ -742,7 +739,7 @@ void Serial::SerialImpl::setBreak( bool level )
   {
     if( -1 == ioctl( fd_, TIOCCBRK ) )
     {
-      stringstream ss;
+      std::stringstream ss;
       ss << "setBreak failed on a call to ioctl(TIOCCBRK): " << errno << " " << strerror( errno );
       throw( SerialException( ss.str().c_str() ) );
     }
@@ -759,7 +756,7 @@ void Serial::SerialImpl::setRTS( bool level )
   {
     if( -1 == ioctl( fd_, TIOCMBIS, &command ) )
     {
-      stringstream ss;
+      std::stringstream ss;
       ss << "setRTS failed on a call to ioctl(TIOCMBIS): " << errno << " " << strerror( errno );
       throw( SerialException( ss.str().c_str() ) );
     }
@@ -768,7 +765,7 @@ void Serial::SerialImpl::setRTS( bool level )
   {
     if( -1 == ioctl( fd_, TIOCMBIC, &command ) )
     {
-      stringstream ss;
+      std::stringstream ss;
       ss << "setRTS failed on a call to ioctl(TIOCMBIC): " << errno << " " << strerror( errno );
       throw( SerialException( ss.str().c_str() ) );
     }
@@ -785,7 +782,7 @@ void Serial::SerialImpl::setDTR( bool level )
   {
     if( -1 == ioctl( fd_, TIOCMBIS, &command ) )
     {
-      stringstream ss;
+      std::stringstream ss;
       ss << "setDTR failed on a call to ioctl(TIOCMBIS): " << errno << " " << strerror( errno );
       throw( SerialException( ss.str().c_str() ) );
     }
@@ -794,7 +791,7 @@ void Serial::SerialImpl::setDTR( bool level )
   {
     if( -1 == ioctl( fd_, TIOCMBIC, &command ) )
     {
-      stringstream ss;
+      std::stringstream ss;
       ss << "setDTR failed on a call to ioctl(TIOCMBIC): " << errno << " " << strerror( errno );
       throw( SerialException( ss.str().c_str() ) );
     }
@@ -829,7 +826,7 @@ bool Serial::SerialImpl::waitForChange()
 
   if( -1 == ioctl( fd_, TIOCMIWAIT, &command ) )
   {
-    stringstream ss;
+    std::stringstream ss;
     ss << "waitForDSR failed on a call to ioctl(TIOCMIWAIT): " << errno << " " << strerror( errno );
     throw( SerialException( ss.str().c_str() ) );
   }
@@ -845,7 +842,7 @@ bool Serial::SerialImpl::getCTS()
 
   if( -1 == ioctl( fd_, TIOCMGET, &status ) )
   {
-    stringstream ss;
+    std::stringstream ss;
     ss << "getCTS failed on a call to ioctl(TIOCMGET): " << errno << " " << strerror( errno );
     throw( SerialException( ss.str().c_str() ) );
   }
@@ -863,7 +860,7 @@ bool Serial::SerialImpl::getDSR()
 
   if( -1 == ioctl( fd_, TIOCMGET, &status ) )
   {
-    stringstream ss;
+    std::stringstream ss;
     ss << "getDSR failed on a call to ioctl(TIOCMGET): " << errno << " " << strerror( errno );
     throw( SerialException( ss.str().c_str() ) );
   }
@@ -881,7 +878,7 @@ bool Serial::SerialImpl::getRI()
 
   if( -1 == ioctl( fd_, TIOCMGET, &status ) )
   {
-    stringstream ss;
+    std::stringstream ss;
     ss << "getRI failed on a call to ioctl(TIOCMGET): " << errno << " " << strerror( errno );
     throw( SerialException( ss.str().c_str() ) );
   }
@@ -899,7 +896,7 @@ bool Serial::SerialImpl::getCD()
 
   if( -1 == ioctl( fd_, TIOCMGET, &status ) )
   {
-    stringstream ss;
+    std::stringstream ss;
     ss << "getCD failed on a call to ioctl(TIOCMGET): " << errno << " " << strerror( errno );
     throw( SerialException( ss.str().c_str() ) );
   }

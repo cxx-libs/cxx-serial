@@ -21,28 +21,21 @@
 #include <vector>
 
 using serial_cpp::PortInfo;
-using std::cout;
-using std::endl;
-using std::getline;
-using std::ifstream;
-using std::istringstream;
-using std::string;
-using std::vector;
 
-static vector<string> glob( const vector<string>& patterns );
-static string         basename( const string& path );
-static string         dirname( const string& path );
-static bool           path_exists( const string& path );
-static string         realpath( const string& path );
-static string         usb_sysfs_friendly_name( const string& sys_usb_path );
-static vector<string> get_sysfs_info( const string& device_path );
-static string         read_line( const string& file );
-static string         usb_sysfs_hw_string( const string& sysfs_path );
-static string         format( const char* format, ... );
+static std::vector<std::string> glob( const std::vector<std::string>& patterns );
+static std::string              basename( const std::string& path );
+static std::string              dirname( const std::string& path );
+static bool                     path_exists( const std::string& path );
+static std::string              realpath( const std::string& path );
+static std::string              usb_sysfs_friendly_name( const std::string& sys_usb_path );
+static std::vector<std::string> get_sysfs_info( const std::string& device_path );
+static std::string              read_line( const std::string& file );
+static std::string              usb_sysfs_hw_string( const std::string& sysfs_path );
+static std::string              format( const char* format, ... );
 
-vector<string> glob( const vector<string>& patterns )
+std::vector<std::string> glob( const std::vector<std::string>& patterns )
 {
-  vector<string> paths_found;
+  std::vector<std::string> paths_found;
 
   if( patterns.size() == 0 ) return paths_found;
 
@@ -50,7 +43,7 @@ vector<string> glob( const vector<string>& patterns )
 
   int glob_retval = glob( patterns[0].c_str(), 0, NULL, &glob_results );
 
-  vector<string>::const_iterator iter = patterns.begin();
+  std::vector<std::string>::const_iterator iter = patterns.begin();
 
   while( ++iter != patterns.end() ) { glob_retval = glob( iter->c_str(), GLOB_APPEND, NULL, &glob_results ); }
 
@@ -61,27 +54,27 @@ vector<string> glob( const vector<string>& patterns )
   return paths_found;
 }
 
-string basename( const string& path )
+std::string basename( const std::string& path )
 {
   size_t pos = path.rfind( "/" );
 
   if( pos == std::string::npos ) return path;
 
-  return string( path, pos + 1, string::npos );
+  return std::string( path, pos + 1, std::string::npos );
 }
 
-string dirname( const string& path )
+std::string dirname( const std::string& path )
 {
-  size_t pos = path.rfind( "/" );
+  std::size_t pos = path.rfind( "/" );
 
   if( pos == std::string::npos ) return path;
   else if( pos == 0 )
     return "/";
 
-  return string( path, 0, pos );
+  return std::string( path, 0, pos );
 }
 
-bool path_exists( const string& path )
+bool path_exists( const std::string& path )
 {
   struct stat sb;
 
@@ -90,11 +83,11 @@ bool path_exists( const string& path )
   return false;
 }
 
-string realpath( const string& path )
+std::string realpath( const std::string& path )
 {
   char* real_path = realpath( path.c_str(), NULL );
 
-  string result;
+  std::string result;
 
   if( real_path != NULL )
   {
@@ -106,32 +99,32 @@ string realpath( const string& path )
   return result;
 }
 
-string usb_sysfs_friendly_name( const string& sys_usb_path )
+std::string usb_sysfs_friendly_name( const std::string& sys_usb_path )
 {
   unsigned int device_number = 0;
 
-  istringstream( read_line( sys_usb_path + "/devnum" ) ) >> device_number;
+  std::istringstream( read_line( sys_usb_path + "/devnum" ) ) >> device_number;
 
-  string manufacturer = read_line( sys_usb_path + "/manufacturer" );
+  std::string manufacturer = read_line( sys_usb_path + "/manufacturer" );
 
-  string product = read_line( sys_usb_path + "/product" );
+  std::string product = read_line( sys_usb_path + "/product" );
 
-  string serial = read_line( sys_usb_path + "/serial" );
+  std::string serial = read_line( sys_usb_path + "/serial" );
 
   if( manufacturer.empty() && product.empty() && serial.empty() ) return "";
 
   return format( "%s %s %s", manufacturer.c_str(), product.c_str(), serial.c_str() );
 }
 
-vector<string> get_sysfs_info( const string& device_path )
+std::vector<std::string> get_sysfs_info( const std::string& device_path )
 {
-  string device_name = basename( device_path );
+  std::string device_name = basename( device_path );
 
-  string friendly_name;
+  std::string friendly_name;
 
-  string hardware_id;
+  std::string hardware_id;
 
-  string sys_device_path = format( "/sys/class/tty/%s/device", device_name.c_str() );
+  std::string sys_device_path = format( "/sys/class/tty/%s/device", device_name.c_str() );
 
   if( device_name.compare( 0, 6, "ttyUSB" ) == 0 )
   {
@@ -159,7 +152,7 @@ vector<string> get_sysfs_info( const string& device_path )
   {
     // Try to read ID string of PCI device
 
-    string sys_id_path = sys_device_path + "/id";
+    std::string sys_id_path = sys_device_path + "/id";
 
     if( path_exists( sys_id_path ) ) hardware_id = read_line( sys_id_path );
   }
@@ -168,31 +161,31 @@ vector<string> get_sysfs_info( const string& device_path )
 
   if( hardware_id.empty() ) hardware_id = "n/a";
 
-  vector<string> result;
+  std::vector<std::string> result;
   result.push_back( friendly_name );
   result.push_back( hardware_id );
 
   return result;
 }
 
-string read_line( const string& file )
+std::string read_line( const std::string& file )
 {
-  ifstream ifs( file.c_str(), ifstream::in );
+  std::ifstream ifs( file.c_str(), std::ifstream::in );
 
-  string line;
+  std::string line;
 
   if( ifs ) { getline( ifs, line ); }
 
   return line;
 }
 
-string format( const char* format, ... )
+std::string format( const char* format, ... )
 {
   va_list ap;
 
-  size_t buffer_size_bytes = 256;
+  std::size_t buffer_size_bytes = 256;
 
-  string result;
+  std::string result;
 
   char* buffer = (char*)malloc( buffer_size_bytes );
 
@@ -239,24 +232,24 @@ string format( const char* format, ... )
   return result;
 }
 
-string usb_sysfs_hw_string( const string& sysfs_path )
+std::string usb_sysfs_hw_string( const std::string& sysfs_path )
 {
-  string serial_number = read_line( sysfs_path + "/serial" );
+  std::string serial_number = read_line( sysfs_path + "/serial" );
 
   if( serial_number.length() > 0 ) { serial_number = format( "SNR=%s", serial_number.c_str() ); }
 
-  string vid = read_line( sysfs_path + "/idVendor" );
+  std::string vid = read_line( sysfs_path + "/idVendor" );
 
-  string pid = read_line( sysfs_path + "/idProduct" );
+  std::string pid = read_line( sysfs_path + "/idProduct" );
 
   return format( "USB VID:PID=%s:%s %s", vid.c_str(), pid.c_str(), serial_number.c_str() );
 }
 
-vector<PortInfo> serial_cpp::list_ports()
+std::vector<PortInfo> serial_cpp::list_ports()
 {
-  vector<PortInfo> results;
+  std::vector<PortInfo> results;
 
-  vector<string> search_globs;
+  std::vector<std::string> search_globs;
   search_globs.push_back( "/dev/ttyACM*" );
   search_globs.push_back( "/dev/ttyS*" );
   search_globs.push_back( "/dev/ttyUSB*" );
@@ -264,19 +257,19 @@ vector<PortInfo> serial_cpp::list_ports()
   search_globs.push_back( "/dev/cu.*" );
   search_globs.push_back( "/dev/rfcomm*" );
 
-  vector<string> devices_found = glob( search_globs );
+  std::vector<std::string> devices_found = glob( search_globs );
 
-  vector<string>::iterator iter = devices_found.begin();
+  std::vector<std::string>::iterator iter = devices_found.begin();
 
   while( iter != devices_found.end() )
   {
-    string device = *iter++;
+    std::string device = *iter++;
 
-    vector<string> sysfs_info = get_sysfs_info( device );
+    std::vector<std::string> sysfs_info = get_sysfs_info( device );
 
-    string friendly_name = sysfs_info[0];
+    std::string friendly_name = sysfs_info[0];
 
-    string hardware_id = sysfs_info[1];
+    std::string hardware_id = sysfs_info[1];
 
     PortInfo device_entry;
     device_entry.port        = device;

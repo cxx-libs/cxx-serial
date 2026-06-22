@@ -29,6 +29,20 @@ Serial::Serial( const std::string_view port, std::uint32_t baudrate, const seria
   pimpl_( new SerialImpl( port, baudrate, bytesize, parity, stopbits, flowcontrol ) )
 { pimpl_->setTimeout( timeout ); }
 
+Serial& Serial::operator=( Serial&& other ) noexcept
+{
+  if( this != &other )
+  {
+    std::lock_guard<std::mutex> lock_read( m_read );
+    std::lock_guard<std::mutex> lock_write( m_write );
+
+    pimpl_ = std::move( other.pimpl_ );
+  }
+  return *this;
+}
+
+Serial::Serial( Serial&& other ) noexcept : pimpl_( std::move( other.pimpl_ ) ) {}
+
 Serial::~Serial() noexcept {}
 
 void Serial::open() { pimpl_->open(); }

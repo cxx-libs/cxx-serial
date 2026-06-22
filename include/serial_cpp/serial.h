@@ -591,10 +591,14 @@ public:
   /*! Returns the current status of the CD line. */
   bool getCD();
 
+  // Move constructor
+  Serial( Serial&& other ) noexcept;
+  Serial& operator=( Serial&& other ) noexcept;
+
 private:
-  // Disable copy constructors
-  Serial( const Serial& );
-  Serial& operator=( const Serial& );
+  // Disable copy
+  Serial( const Serial& )            = delete;
+  Serial& operator=( const Serial& ) = delete;
 
   // Pimpl idiom, d_pointer
   class SerialImpl;

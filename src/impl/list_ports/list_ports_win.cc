@@ -88,15 +88,9 @@ std::vector<PortInfo> serial_cpp::list_ports()
     else
       hardware_id[0] = '\0';
 
-#ifdef UNICODE
     std::string portName     = utf8_encode( port_name );
     std::string friendlyName = utf8_encode( friendly_name );
     std::string hardwareId   = utf8_encode( hardware_id );
-#else
-    std::string portName     = port_name;
-    std::string friendlyName = friendly_name;
-    std::string hardwareId   = hardware_id;
-#endif
 
     PortInfo port_entry;
     port_entry.port        = portName;
