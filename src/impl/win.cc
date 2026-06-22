@@ -18,7 +18,7 @@ inline std::wstring _prefix_port_if_needed( const std::string_view input )
 {
   static const std::wstring windows_com_port_prefix = L"\\\\.\\";
   // convert UTF-8 (or narrow) string_view -> wstring
-  const std::size_t         size_needed{ MultiByteToWideChar( CP_UTF8, 0, input.data(), static_cast<int>( input.size() ), nullptr, 0 ) };
+  const std::size_t         size_needed{ static_cast<std::size_t>( MultiByteToWideChar( CP_UTF8, 0, input.data(), static_cast<int>( input.size() ), nullptr, 0 ) ) };
   std::wstring              winput( size_needed, L'\0' );
   MultiByteToWideChar( CP_UTF8, 0, input.data(), static_cast<int>( input.size() ), winput.data(), size_needed );
   if( winput.compare( 0, windows_com_port_prefix.size(), windows_com_port_prefix ) != 0 ) return windows_com_port_prefix + winput;
