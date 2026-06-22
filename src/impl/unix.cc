@@ -103,7 +103,7 @@ timespec timespec_from_ms( const uint32_t millis )
   return time;
 }
 
-Serial::SerialImpl::SerialImpl( const string& port, unsigned long baudrate, bytesize_t bytesize, parity_t parity, stopbits_t stopbits, flowcontrol_t flowcontrol ) :
+Serial::SerialImpl::SerialImpl( const std::string_view port, unsigned long baudrate, bytesize_t bytesize, parity_t parity, stopbits_t stopbits, flowcontrol_t flowcontrol ) :
   port_( port ), fd_( -1 ), is_open_( false ), xonxoff_( false ), rtscts_( false ), baudrate_( baudrate ), parity_( parity ), bytesize_( bytesize ), stopbits_( stopbits ), flowcontrol_( flowcontrol )
 {
   if( port_.empty() == false ) open();

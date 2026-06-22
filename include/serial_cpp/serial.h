@@ -45,6 +45,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #define THROW( exceptionClass, message ) throw exceptionClass( __FILE__, __LINE__, ( message ) )
@@ -173,7 +174,7 @@ public:
    * \throw serial_cpp::IOException
    * \throw std::invalid_argument
    */
-  Serial( const std::string& port = "", std::uint32_t baudrate = 9600, const Timeout& timeout = Timeout(), bytesize_t bytesize = eightbits, parity_t parity = parity_none, stopbits_t stopbits = stopbits_one, flowcontrol_t flowcontrol = flowcontrol_none );
+  Serial( const std::string_view port = "", std::uint32_t baudrate = 9600, const Timeout& timeout = Timeout(), bytesize_t bytesize = eightbits, parity_t parity = parity_none, stopbits_t stopbits = stopbits_one, flowcontrol_t flowcontrol = flowcontrol_none );
 
   /*! Destructor */
   virtual ~Serial() noexcept;

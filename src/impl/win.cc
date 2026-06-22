@@ -21,8 +21,8 @@ inline std::wstring _prefix_port_if_needed( const std::wstring& input )
   return input;
 }
 
-Serial::SerialImpl::SerialImpl( const std::string& port, unsigned long baudrate, bytesize_t bytesize, parity_t parity, stopbits_t stopbits, flowcontrol_t flowcontrol ) :
-  port_( port.begin(), port.end() ), baudrate_( baudrate ), parity_( parity ), bytesize_( bytesize ), stopbits_( stopbits ), flowcontrol_( flowcontrol )
+Serial::SerialImpl::SerialImpl( const std::string_view port, unsigned long baudrate, bytesize_t bytesize, parity_t parity, stopbits_t stopbits, flowcontrol_t flowcontrol ) :
+  port_( port ), baudrate_( baudrate ), parity_( parity ), bytesize_( bytesize ), stopbits_( stopbits ), flowcontrol_( flowcontrol )
 {
   if( port_.empty() == false ) open();
 }

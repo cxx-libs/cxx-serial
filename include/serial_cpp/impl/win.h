@@ -48,7 +48,7 @@ using serial_cpp::SerialException;
 class serial_cpp::Serial::SerialImpl
 {
 public:
-  SerialImpl( const std::string& port, unsigned long baudrate, bytesize_t bytesize, parity_t parity, stopbits_t stopbits, flowcontrol_t flowcontrol );
+  SerialImpl( const std::string_view port, unsigned long baudrate, bytesize_t bytesize, parity_t parity, stopbits_t stopbits, flowcontrol_t flowcontrol );
 
   virtual ~SerialImpl();
 
@@ -124,8 +124,8 @@ protected:
   void reconfigurePort();
 
 private:
-  std::wstring port_;  // Path to the file descriptor
-  void*        fd_{ nullptr };
+  std::string port_;  // Path to the file descriptor
+  void*       fd_{ nullptr };
 
   bool is_open_{ false };
 

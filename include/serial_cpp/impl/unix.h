@@ -61,7 +61,7 @@ private:
 class serial_cpp::Serial::SerialImpl
 {
 public:
-  SerialImpl( const std::string& port, unsigned long baudrate, bytesize_t bytesize, parity_t parity, stopbits_t stopbits, flowcontrol_t flowcontrol );
+  SerialImpl( const std::string_view port, unsigned long baudrate, bytesize_t bytesize, parity_t parity, stopbits_t stopbits, flowcontrol_t flowcontrol );
 
   virtual ~SerialImpl();
 
