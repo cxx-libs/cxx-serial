@@ -127,7 +127,7 @@ private:
   std::wstring port_;  // Path to the file descriptor
   void*        fd_{ nullptr };
 
-  bool is_open_;
+  bool is_open_{ false };
 
   Timeout       timeout_;   // Timeout for read operations
   unsigned long baudrate_;  // Baudrate

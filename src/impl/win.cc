@@ -1,10 +1,8 @@
-#if defined( _WIN32 )
-
 /* Copyright 2012 William Woodall and John Harrison */
+#include "serial_cpp/impl/win.h"
 
-  #include "serial_cpp/impl/win.h"
-
-  #include <sstream>
+#include <Windows.h>
+#include <sstream>
 
 using serial_cpp::bytesize_t;
 using serial_cpp::flowcontrol_t;
@@ -15,20 +13,16 @@ using serial_cpp::Serial;
 using serial_cpp::SerialException;
 using serial_cpp::stopbits_t;
 using serial_cpp::Timeout;
-using std::invalid_argument;
-using std::string;
-using std::stringstream;
-using std::wstring;
 
-inline wstring _prefix_port_if_needed( const wstring& input )
+inline std::wstring _prefix_port_if_needed( const std::wstring& input )
 {
-  static wstring windows_com_port_prefix = L"\\\\.\\";
+  static std::wstring windows_com_port_prefix = L"\\\\.\\";
   if( input.compare( 0, windows_com_port_prefix.size(), windows_com_port_prefix ) != 0 ) { return windows_com_port_prefix + input; }
   return input;
 }
 
-Serial::SerialImpl::SerialImpl( const string& port, unsigned long baudrate, bytesize_t bytesize, parity_t parity, stopbits_t stopbits, flowcontrol_t flowcontrol ) :
-  port_( port.begin(), port.end() ), fd_( INVALID_HANDLE_VALUE ), is_open_( false ), baudrate_( baudrate ), parity_( parity ), bytesize_( bytesize ), stopbits_( stopbits ), flowcontrol_( flowcontrol )
+Serial::SerialImpl::SerialImpl( const std::string& port, unsigned long baudrate, bytesize_t bytesize, parity_t parity, stopbits_t stopbits, flowcontrol_t flowcontrol ) :
+  port_( port.begin(), port.end() ), baudrate_( baudrate ), parity_( parity ), bytesize_( bytesize ), stopbits_( stopbits ), flowcontrol_( flowcontrol )
 {
   if( port_.empty() == false ) open();
 }
@@ -37,18 +31,18 @@ Serial::SerialImpl::~SerialImpl() { this->close(); }
 
 void Serial::SerialImpl::open()
 {
-  if( port_.empty() ) { throw invalid_argument( "Empty port is invalid." ); }
+  if( port_.empty() ) { throw std::invalid_argument( "Empty port is invalid." ); }
   if( is_open_ == true ) { throw SerialException( "Serial port already open." ); }
 
   // See: https://github.com/wjwwood/serial/issues/84
-  wstring port_with_prefix = _prefix_port_if_needed( port_ );
-  LPCWSTR lp_port          = port_with_prefix.c_str();
-  fd_                      = CreateFileW( lp_port, GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0 );
+  std::wstring port_with_prefix = _prefix_port_if_needed( port_ );
+  LPCWSTR      lp_port          = port_with_prefix.c_str();
+  fd_                           = CreateFileW( lp_port, GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0 );
 
   if( fd_ == INVALID_HANDLE_VALUE )
   {
-    DWORD        create_file_err = GetLastError();
-    stringstream ss;
+    DWORD             create_file_err = GetLastError();
+    std::stringstream ss;
     switch( create_file_err )
     {
       case ERROR_FILE_NOT_FOUND:
@@ -84,90 +78,90 @@ void Serial::SerialImpl::reconfigurePort()
   // setup baud rate
   switch( baudrate_ )
   {
-  #ifdef CBR_0
+#ifdef CBR_0
     case 0: dcbSerialParams.BaudRate = CBR_0; break;
-  #endif
-  #ifdef CBR_50
+#endif
+#ifdef CBR_50
     case 50: dcbSerialParams.BaudRate = CBR_50; break;
-  #endif
-  #ifdef CBR_75
+#endif
+#ifdef CBR_75
     case 75: dcbSerialParams.BaudRate = CBR_75; break;
-  #endif
-  #ifdef CBR_110
+#endif
+#ifdef CBR_110
     case 110: dcbSerialParams.BaudRate = CBR_110; break;
-  #endif
-  #ifdef CBR_134
+#endif
+#ifdef CBR_134
     case 134: dcbSerialParams.BaudRate = CBR_134; break;
-  #endif
-  #ifdef CBR_150
+#endif
+#ifdef CBR_150
     case 150: dcbSerialParams.BaudRate = CBR_150; break;
-  #endif
-  #ifdef CBR_200
+#endif
+#ifdef CBR_200
     case 200: dcbSerialParams.BaudRate = CBR_200; break;
-  #endif
-  #ifdef CBR_300
+#endif
+#ifdef CBR_300
     case 300: dcbSerialParams.BaudRate = CBR_300; break;
-  #endif
-  #ifdef CBR_600
+#endif
+#ifdef CBR_600
     case 600: dcbSerialParams.BaudRate = CBR_600; break;
-  #endif
-  #ifdef CBR_1200
+#endif
+#ifdef CBR_1200
     case 1200: dcbSerialParams.BaudRate = CBR_1200; break;
-  #endif
-  #ifdef CBR_1800
+#endif
+#ifdef CBR_1800
     case 1800: dcbSerialParams.BaudRate = CBR_1800; break;
-  #endif
-  #ifdef CBR_2400
+#endif
+#ifdef CBR_2400
     case 2400: dcbSerialParams.BaudRate = CBR_2400; break;
-  #endif
-  #ifdef CBR_4800
+#endif
+#ifdef CBR_4800
     case 4800: dcbSerialParams.BaudRate = CBR_4800; break;
-  #endif
-  #ifdef CBR_7200
+#endif
+#ifdef CBR_7200
     case 7200: dcbSerialParams.BaudRate = CBR_7200; break;
-  #endif
-  #ifdef CBR_9600
+#endif
+#ifdef CBR_9600
     case 9600: dcbSerialParams.BaudRate = CBR_9600; break;
-  #endif
-  #ifdef CBR_14400
+#endif
+#ifdef CBR_14400
     case 14400: dcbSerialParams.BaudRate = CBR_14400; break;
-  #endif
-  #ifdef CBR_19200
+#endif
+#ifdef CBR_19200
     case 19200: dcbSerialParams.BaudRate = CBR_19200; break;
-  #endif
-  #ifdef CBR_28800
+#endif
+#ifdef CBR_28800
     case 28800: dcbSerialParams.BaudRate = CBR_28800; break;
-  #endif
-  #ifdef CBR_57600
+#endif
+#ifdef CBR_57600
     case 57600: dcbSerialParams.BaudRate = CBR_57600; break;
-  #endif
-  #ifdef CBR_76800
+#endif
+#ifdef CBR_76800
     case 76800: dcbSerialParams.BaudRate = CBR_76800; break;
-  #endif
-  #ifdef CBR_38400
+#endif
+#ifdef CBR_38400
     case 38400: dcbSerialParams.BaudRate = CBR_38400; break;
-  #endif
-  #ifdef CBR_115200
+#endif
+#ifdef CBR_115200
     case 115200: dcbSerialParams.BaudRate = CBR_115200; break;
-  #endif
-  #ifdef CBR_128000
+#endif
+#ifdef CBR_128000
     case 128000: dcbSerialParams.BaudRate = CBR_128000; break;
-  #endif
-  #ifdef CBR_153600
+#endif
+#ifdef CBR_153600
     case 153600: dcbSerialParams.BaudRate = CBR_153600; break;
-  #endif
-  #ifdef CBR_230400
+#endif
+#ifdef CBR_230400
     case 230400: dcbSerialParams.BaudRate = CBR_230400; break;
-  #endif
-  #ifdef CBR_256000
+#endif
+#ifdef CBR_256000
     case 256000: dcbSerialParams.BaudRate = CBR_256000; break;
-  #endif
-  #ifdef CBR_460800
+#endif
+#ifdef CBR_460800
     case 460800: dcbSerialParams.BaudRate = CBR_460800; break;
-  #endif
-  #ifdef CBR_921600
+#endif
+#ifdef CBR_921600
     case 921600: dcbSerialParams.BaudRate = CBR_921600; break;
-  #endif
+#endif
     default:
       // Try to blindly assign it
       dcbSerialParams.BaudRate = baudrate_;
@@ -182,7 +176,7 @@ void Serial::SerialImpl::reconfigurePort()
   else if( bytesize_ == fivebits )
     dcbSerialParams.ByteSize = 5;
   else
-    throw invalid_argument( "invalid char len" );
+    throw std::invalid_argument( "invalid char len" );
 
   // setup stopbits
   if( stopbits_ == stopbits_one ) dcbSerialParams.StopBits = ONESTOPBIT;
@@ -191,7 +185,7 @@ void Serial::SerialImpl::reconfigurePort()
   else if( stopbits_ == stopbits_two )
     dcbSerialParams.StopBits = TWOSTOPBITS;
   else
-    throw invalid_argument( "invalid stop bit" );
+    throw std::invalid_argument( "invalid stop bit" );
 
   // setup parity
   if( parity_ == parity_none ) { dcbSerialParams.Parity = NOPARITY; }
@@ -201,7 +195,7 @@ void Serial::SerialImpl::reconfigurePort()
   else if( parity_ == parity_space ) { dcbSerialParams.Parity = SPACEPARITY; }
   else
   {
-    throw invalid_argument( "invalid parity" );
+    throw std::invalid_argument( "invalid parity" );
   }
 
   // setup flowcontrol
@@ -309,16 +303,16 @@ size_t Serial::SerialImpl::write( const uint8_t* data, size_t length )
   DWORD bytes_written;
   if( !WriteFile( fd_, data, static_cast<DWORD>( length ), &bytes_written, NULL ) )
   {
-    stringstream ss;
+    std::stringstream ss;
     ss << "Error while writing to the serial port: " << GetLastError();
     THROW( IOException, ss.str().c_str() );
   }
   return (size_t)( bytes_written );
 }
 
-void Serial::SerialImpl::setPort( const string& port ) { port_ = wstring( port.begin(), port.end() ); }
+void Serial::SerialImpl::setPort( const std::string& port ) { port_ = std::wstring( port.begin(), port.end() ); }
 
-string Serial::SerialImpl::getPort() const { return string( port_.begin(), port_.end() ); }
+std::string Serial::SerialImpl::getPort() const { return std::string( port_.begin(), port_.end() ); }
 
 void Serial::SerialImpl::setTimeout( const serial_cpp::Timeout& timeout )
 {
@@ -480,5 +474,3 @@ bool Serial::SerialImpl::getCD()
 
   return ( MS_RLSD_ON & dwModemStatus ) != 0;
 }
-
-#endif  // #if defined(_WIN32)
