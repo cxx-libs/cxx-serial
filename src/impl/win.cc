@@ -248,7 +248,7 @@ void Serial::SerialImpl::close()
       ret = CloseHandle( fd_ );
       if( ret == 0 )
       {
-        stringstream ss;
+        std::stringstream ss;
         ss << "Error while closing serial port: " << GetLastError();
         THROW( IOException, ss.str().c_str() );
       }
@@ -269,7 +269,7 @@ size_t Serial::SerialImpl::available()
   COMSTAT cs;
   if( !ClearCommError( fd_, NULL, &cs ) )
   {
-    stringstream ss;
+    std::stringstream ss;
     ss << "Error while checking status of the serial port: " << GetLastError();
     THROW( IOException, ss.str().c_str() );
   }
@@ -290,7 +290,7 @@ size_t Serial::SerialImpl::read( uint8_t* buf, size_t size )
   DWORD bytes_read;
   if( !ReadFile( fd_, buf, static_cast<DWORD>( size ), &bytes_read, NULL ) )
   {
-    stringstream ss;
+    std::stringstream ss;
     ss << "Error while reading from the serial port: " << GetLastError();
     THROW( IOException, ss.str().c_str() );
   }
