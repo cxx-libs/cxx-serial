@@ -14,6 +14,30 @@ using serial_cpp::SerialException;
 using serial_cpp::stopbits_t;
 using serial_cpp::Timeout;
 
+struct Serial::SerialImpl::WinOverlappedData
+{
+  OVERLAPPED read{};
+  OVERLAPPED write{};
+  OVERLAPPED event{};
+
+  WinOverlappedData()
+  {
+    ZeroMemory( &read, sizeof( OVERLAPPED ) );
+    read.hEvent = CreateEvent( nullptr, TRUE, FALSE, nullptr );
+    ZeroMemory( &write, sizeof( OVERLAPPED ) );
+    write.hEvent = CreateEvent( nullptr, TRUE, FALSE, nullptr );
+    ZeroMemory( &event, sizeof( OVERLAPPED ) );
+    event.hEvent = CreateEvent( nullptr, TRUE, FALSE, nullptr );
+  }
+
+  ~WinOverlappedData() noexcept
+  {
+    if( read.hEvent ) CloseHandle( read.hEvent );
+    if( write.hEvent ) CloseHandle( write.hEvent );
+    if( event.hEvent ) CloseHandle( event.hEvent );
+  }
+};
+
 inline std::wstring _prefix_port_if_needed( const std::string_view input )
 {
   static const std::wstring windows_com_port_prefix = L"\\\\.\\";
@@ -25,8 +49,8 @@ inline std::wstring _prefix_port_if_needed( const std::string_view input )
   return winput;
 }
 
-Serial::SerialImpl::SerialImpl( const std::string_view port, unsigned long baudrate, bytesize_t bytesize, parity_t parity, stopbits_t stopbits, flowcontrol_t flowcontrol ) :
-  port_( port ), baudrate_( baudrate ), parity_( parity ), bytesize_( bytesize ), stopbits_( stopbits ), flowcontrol_( flowcontrol )
+Serial::SerialImpl::SerialImpl( const std::string_view port, unsigned long baudrate, bytesize_t bytesize, parity_t parity, stopbits_t stopbits,
+                                flowcontrol_t flowcontrol ) : : ov_( std::make_unique<WinOverlappedData>() ), port_( port ), baudrate_( baudrate ), parity_( parity ), bytesize_( bytesize ), stopbits_( stopbits ), flowcontrol_( flowcontrol )
 {
   if( port_.empty() == false ) open();
 }
