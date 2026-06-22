@@ -1,27 +1,24 @@
-#if defined( __linux__ )
-
 /*
  * Copyright (c) 2014 Craig Lilley <cralilley@gmail.com>
  * This software is made available under the terms of the MIT licence.
  * A copy of the licence can be obtained from:
  * http://opensource.org/licenses/MIT
  */
+#include "serial_cpp/serial.h"
 
-  #include "serial_cpp/serial.h"
-
-  #include <cstdarg>
-  #include <cstdio>
-  #include <cstdlib>
-  #include <fstream>
-  #include <glob.h>
-  #include <iostream>
-  #include <sstream>
-  #include <stdexcept>
-  #include <string>
-  #include <sys/stat.h>
-  #include <sys/types.h>
-  #include <unistd.h>
-  #include <vector>
+#include <cstdarg>
+#include <cstdio>
+#include <cstdlib>
+#include <fstream>
+#include <glob.h>
+#include <iostream>
+#include <sstream>
+#include <stdexcept>
+#include <string>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <vector>
 
 using serial_cpp::PortInfo;
 using std::cout;
@@ -291,5 +288,3 @@ vector<PortInfo> serial_cpp::list_ports()
 
   return results;
 }
-
-#endif  // defined(__linux__)

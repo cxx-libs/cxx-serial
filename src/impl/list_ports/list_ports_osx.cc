@@ -1,22 +1,20 @@
-#if defined( __APPLE__ )
+#include "serial_cpp/serial.h"
 
-  #include "serial_cpp/serial.h"
-
-  #include <CoreFoundation/CoreFoundation.h>
-  #include <IOKit/IOBSD.h>
-  #include <IOKit/IOKitLib.h>
-  #include <IOKit/serial/IOSerialKeys.h>
-  #include <iostream>
-  #include <stdint.h>
-  #include <string>
-  #include <sys/param.h>
-  #include <vector>
+#include <CoreFoundation/CoreFoundation.h>
+#include <IOKit/IOBSD.h>
+#include <IOKit/IOKitLib.h>
+#include <IOKit/serial/IOSerialKeys.h>
+#include <iostream>
+#include <stdint.h>
+#include <string>
+#include <sys/param.h>
+#include <vector>
 
 using serial_cpp::PortInfo;
 using std::string;
 using std::vector;
 
-  #define HARDWARE_ID_STRING_LENGTH 128
+#define HARDWARE_ID_STRING_LENGTH 128
 
 string              cfstring_to_string( CFStringRef cfstring );
 string              get_device_path( io_object_t& serial_port );
@@ -228,5 +226,3 @@ vector<PortInfo> serial_cpp::list_ports( void )
   IOObjectRelease( serial_port_iterator );
   return devices_found;
 }
-
-#endif  // defined(__APPLE__)

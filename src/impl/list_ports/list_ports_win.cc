@@ -1,25 +1,20 @@
-#if defined( _WIN32 )
-
 /*
  * Copyright (c) 2014 Craig Lilley <cralilley@gmail.com>
  * This software is made available under the terms of the MIT licence.
  * A copy of the licence can be obtained from:
  * http://opensource.org/licenses/MIT
  */
+#include "serial_cpp/serial.h"
 
-  #include "serial_cpp/serial.h"
-
-  #include <cstring>
-  #include <devguid.h>
-  #include <initguid.h>
-  #include <setupapi.h>
-  #include <tchar.h>
-  #include <windows.h>
-  #include <winioctl.h>
+#include <cstring>
+#include <devguid.h>
+#include <initguid.h>
+#include <setupapi.h>
+#include <tchar.h>
+#include <windows.h>
+#include <winioctl.h>
 
 using serial_cpp::PortInfo;
-using std::string;
-using std::vector;
 
 static const DWORD port_name_max_length     = 256;
 static const DWORD friendly_name_max_length = 256;
@@ -34,9 +29,9 @@ std::string utf8_encode( const std::wstring& wstr )
   return strTo;
 }
 
-vector<PortInfo> serial_cpp::list_ports()
+std::vector<PortInfo> serial_cpp::list_ports()
 {
-  vector<PortInfo> devices_found;
+  std::vector<PortInfo> devices_found;
 
   HDEVINFO device_info_set = SetupDiGetClassDevs( (const GUID*)&GUID_DEVINTERFACE_COMPORT, NULL, NULL, DIGCF_PRESENT | DIGCF_DEVICEINTERFACE );
 
@@ -92,15 +87,15 @@ vector<PortInfo> serial_cpp::list_ports()
     else
       hardware_id[0] = '\0';
 
-  #ifdef UNICODE
+#ifdef UNICODE
     std::string portName     = utf8_encode( port_name );
     std::string friendlyName = utf8_encode( friendly_name );
     std::string hardwareId   = utf8_encode( hardware_id );
-  #else
+#else
     std::string portName     = port_name;
     std::string friendlyName = friendly_name;
     std::string hardwareId   = hardware_id;
-  #endif
+#endif
 
     PortInfo port_entry;
     port_entry.port        = portName;
@@ -114,5 +109,3 @@ vector<PortInfo> serial_cpp::list_ports()
 
   return devices_found;
 }
-
-#endif  // #if defined(_WIN32)
